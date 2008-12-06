@@ -1,0 +1,6 @@
+bzcat corpus1/enwikisource-20081112-pages-articles.xml.bz2 | 
+python words.py |
+sort | 
+uniq -c | 
+python probability.py 1 |
+sort -k 2 >apostrophes

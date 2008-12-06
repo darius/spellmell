@@ -1,0 +1,93 @@
+PROJECT MANAGEMENT
+
+use github?
+etherpad might come in handy
+
+
+INTERFACE
+
+O accept context of candidate misspelling
+O allow choice of 'dictionary'
+O return multiple results
+O accept whole document as running context (for in-document frequencies, etc.)
+X return scored results
+X support dictionary updates at runtime
+
+spell.train(dictfilename, corpus_filenames)
+c = spell.Corrector(dictfilename)
+corrections_iterable = c.correct(text, left_context, right_context)
+  where a correction is a pair (start, hibound, list of candidates)
+  and (start, hibound) is a position range in text
+  and a candidate is a string.
+  The candidates list may be empty (indicates an error we don't know
+  what to suggest for).
+
+
+EVALUATION
+
+accuracy
+  new evaluation set?
+  evaluate with a confusion matrix, not just a % of mistakes?
+  what specifically is our accuracy goal?
+  combine norvig's old eval sets as my new development set
+
+efficiency
+  make a realistic run of a document with some errors
+    (I used my chatlogs but now need something I can publish on github)
+  measure startup time
+  can we easily measure space use?
+  what specifically is our efficiency goal?
+
+
+ACCURACY
+
+better error model
+  varying edit costs
+    where can I get the data?
+    crude version:
+      general costs different, but not content-sensitive, 
+      for inserts, deletes, replaces, transposes;
+      or for doubling/undoubling a consonant or a vowel;
+      also, modify costs at beginning or end of word.
+  consider edits at greater distance
+
+better language model
+  bigger corpus
+  character-level n-grams
+  use word n-gram context
+    Amber (Zooko's wife) wrote a paper
+  select one dialect for corpus (american vs. british)
+  cleaned corpus with no spelling errors
+  fix errors in test sets
+  handle apostrophes: contractions, possessives
+    wikipedia also uses them in pronunciations
+  handle capital letters
+  handle punctuation
+  affix stripping
+
+
+EFFICIENCY
+
+use a python profiler? is there a decent one?
+
+throughput
+  enumerate only edits in the dictionary
+    tricky with transpositions
+    can we avoid redundantly enumerating commuting edits?
+  cache answers?
+
+space efficiency
+  binary search of an array
+
+startup time
+  mmap the dictionary
+
+
+REFERENCES
+
+http://download.wikipedia.org/backup-index.html
+http://hunspell.sourceforge.net/
+http://stackoverflow.com/questions/307291/how-does-the-google-did-you-mean-algorithm-work
+http://en.wikipedia.org/wiki/Levenshtein_distance
+http://en.wikipedia.org/wiki/Fuzzy_string_searching
+http://nlp.stanford.edu/IR-book/html/htmledition/spelling-correction-1.html
