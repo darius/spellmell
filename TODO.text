@@ -4,23 +4,34 @@ use github?
 etherpad might come in handy
 
 
-INTERFACE
+API
 
-O accept context of candidate misspelling
-O allow choice of 'dictionary'
-O return multiple results
-O accept whole document as running context (for in-document frequencies, etc.)
+- accept context of candidate misspelling
+- allow choice of 'dictionary'
+- return multiple results
+- accept whole document as running context (for in-document frequencies, etc.)
 X return scored results
-X support dictionary updates at runtime
+- support dictionary updates at runtime
+- remember user's corrections
 
-spell.train(dictfilename, corpus_filenames)
-c = spell.Corrector(dictfilename)
-corrections_iterable = c.correct(text, left_context, right_context)
-  where a correction is a pair (start, hibound, list of candidates)
-  and (start, hibound) is a position range in text
-  and a candidate is a string.
-  The candidates list may be empty (indicates an error we don't know
-  what to suggest for).
+c = spell.Corrector(filename)
+                 Where the file either doesn't exist or hold a saved model
+
+c.train(words)   Update the model from an error-free word sequence
+
+c.save(filename=None)
+                 Store the model to a file (the original file if not specified)
+
+mistakes_iterable = c.correct(text, left_context, right_context)
+  Where text, left_context, and right_context are word sequences
+  Where a mistake is an object m:
+
+m.position       A position in text
+m.word           The word at that position
+m.suggestions    A list of words in decreasing order of confidence
+                 (An empty list means a mistake we can detect but not correct)
+m.correct(word)  Updates the corrector's model
+                 (The word doesn't have to be one of the suggestions)
 
 
 EVALUATION
