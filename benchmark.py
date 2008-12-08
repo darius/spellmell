@@ -1,21 +1,22 @@
 import re
-import time
 import sys
+import time
 
-#import norvig as speller
-import faster0 as speller
+#import norvig as spelling
+import faster0 as spelling
 
 def main(argv):
-    input = words(open('chatlogs/chatlogs.text').read())
+    speller = spelling.Speller()
+    speller.load(open('bigdict'))
+    input = open(argv[1]).read()
+    nwords = len(words(input))
     start = time.clock()
     ncorrections = 0
-    for word in input:
-        w = speller.correct(word)
-        if w != word:
-            ncorrections += 1
-            print word, w
+    for mistake in speller.proofread(input):
+        ncorrections += 1
+        print mistake.word, '/'.join(mistake.suggestions)
     sys.stderr.write('%d corrections, %d words, %g secs\n'
-                     % (ncorrections, len(input), time.clock() - start))
+                     % (ncorrections, nwords, time.clock() - start))
 
 def words(text):
     return re.findall('[a-z]+', text.lower()) 
