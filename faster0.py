@@ -1,35 +1,55 @@
-import collections
-import re
-import string
+import collections, cPickle, heapq, re
 
-def correct(word):
-    candidates = (corrections('', word, 0)
-                  or corrections('', word, 1)
-                  or corrections('', word, 2))
-    return max(candidates, key=NWORDS.get) if candidates else word
+## s = Speller()
+## s.train(open('big.txt').read())
+## list(s.proofread('gort'))[0].suggestions
+#. ['got', 'sort', 'port']
 
-def corrections(head, tail, distance):
-    # Return a set of the words in NWORDS that are at the given edit
-    # distance from head+tail (with edits restricted to the tail and
-    # to deletions on the right of the head).
-    # Precondition: head in known_prefixes
-    if 0 == distance:
-        return [head+tail] if head+tail in NWORDS else []
-    exts = [head + c for c in alphabet if head + c in known_prefixes]
-    deletes = ([] if not head else
-               [corrections(head[:-1], tail, distance - 1)])
-    inserts = [corrections(p, tail, distance - 1) for p in exts]
-    if not tail:
-        return flatten(deletes + inserts)
-    transposes = ([corrections(head, tail[1]+tail[0]+tail[2:], distance-1)]
-                  if 2 <= len(tail) and tail[0] != tail[1]
-                  else [])
-    replaces = [corrections(p, tail[1:],
-                            distance if p[-1] == tail[0] else distance-1)
-                for p in exts]
-    return flatten(deletes + transposes + replaces + inserts)
+class Speller:
+    def __init__(self):
+        # _freqs gives the frequencies of all words we've trained on.
+        # _prefixes holds all prefixes of all words we've trained on.
+        self._freqs, self._prefixes = collections.defaultdict(int), set()
+    def train(self, text):
+        for pos, word in words(text):
+            if word not in self._prefixes: self._note_prefixes(word)
+            self._freqs[word] += 1
+    def _note_prefixes(self, word):
+        self._prefixes.update(set(word[:i] for i in range(len(word) + 1)))
+    def save(self, file):
+        cPickle.dump(self._freqs, file)
+    def load(self, file):
+        self._freqs, self._prefixes = cPickle.load(file), set()
+        for word in self._freqs.keys(): 
+            self._note_prefixes(word)
+    def proofread(self, text):
+        for pos, word in words(text):
+            if word in self._freqs: continue
+            edits = self._edits('', word, 1) or self._edits('', word, 2)
+            suggestions = heapq.nlargest(3, edits, key=self._freqs.get)
+            yield Mistake(self, pos, word, suggestions)
+    def _edits(self, head, tail, distance):
+        # Return a set of the words in self._freqs that are at the
+        # given edit distance from head+tail (with edits restricted to
+        # the tail and to deletions on the right of the head).
+        # Precondition: head in self._prefixes
+        if 0 == distance:
+            return [head+tail] if head+tail in self._freqs else []
+        exts = [head + c for c in alphabet if head + c in self._prefixes]
+        deletes = ([] if not head else
+                   [self._edits(head[:-1], tail, distance - 1)])
+        inserts = [self._edits(p, tail, distance - 1) for p in exts]
+        if not tail:
+            return flatten(deletes + inserts)
+        transposes = ([self._edits(head, tail[1]+tail[0]+tail[2:], distance-1)]
+                      if 2 <= len(tail) and tail[0] != tail[1]
+                      else [])
+        replaces = [self._edits(p, tail[1:],
+                                distance if p[-1] == tail[0] else distance-1)
+                    for p in exts]
+        return flatten(deletes + transposes + replaces + inserts)
 
-alphabet = string.ascii_lowercase
+alphabet = 'abcdefghijklmnopqrstuvwxyz'
 
 def flatten(xss):
     result = []
@@ -37,14 +57,16 @@ def flatten(xss):
         result.extend(xs)
     return set(result)
 
-def train(features):
-    model = collections.defaultdict(lambda: 1)
-    for f in features:
-        model[f] += 1
-    return dict(model)
+class Mistake:
+    def __init__(self, corrector, position, word, suggestions):
+        self.corrector   = corrector
+        self.position    = position
+        self.word        = word
+        self.suggestions = suggestions
+    def should_have_been(self, word):
+        if word not in self.suggestions:
+            self.corrector.train(word)
 
 def words(text):
-    return re.findall('[a-z]+', text.lower()) 
-
-NWORDS = train(words(file('data/big.txt').read()))
-known_prefixes = set(_w[:_i] for _w in NWORDS for _i in range(len(_w) + 1))
+    return [(m.start(), m.group(0))
+            for m in re.finditer(r'[a-z]+', text.lower())]

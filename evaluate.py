@@ -1,30 +1,66 @@
-import norvig as speller
-#import faster0 as speller
+#import norvig as spelling
+#import faster0 as spelling
+import faster1 as spelling
 import time
 
 def main(argv):
-    print spelltest(tests1)
-#    print spelltest(tests2)
-    
+    def train_it():
+        trainer = spelling.Speller()
+        trainer.train(open('big.txt').read())
+        trainer.save(open('bigdict', 'w'))
+    timed('training', train_it)
+    speller = spelling.Speller()
+    timed('loading', lambda: speller.load(open('bigdict')))
+    print spelltest(speller, tests1)
+#    print spelltest(speller, tests2)
 
-def spelltest(tests, bias=None, verbose=False):
-    correct = speller.correct
-    NWORDS  = speller.NWORDS    # N.B. if bias, we mutate this
-    if bias:
-        for target in tests: NWORDS[target] = NWORDS.get(target, 1) + bias
-    n, bad, unknown, start = 0, 0, 0, time.clock()
+def timed(label, f):
+    start = time.clock()
+    result = f()
+    print 'Time for %s: %g' % (label, time.clock() - start)
+    return result
+    
+def spelltest(speller, tests, bias=0, verbose=False):
+    for i in range(bias):
+        for target in tests:
+            speller.train(target)
+    n, bad, almost, unknown, start = 0, 0, 0, 0, time.clock()
     for target, wrongs in tests.items():
         for wrong in wrongs.split():
             n += 1
-            w = correct(wrong)
-            if w != target:
-                bad += 1
-                unknown += (target not in NWORDS)
-                if verbose:
-                    print 'correct(%r) => %r (%d); expected %r (%d)' % (
-                        wrong, w, NWORDS.get(w, 1), target, NWORDS.get(target, 1))
-    return dict(bad=bad, n=n, bias=bias, pct=int(100. - 100.*bad/n), 
-                unknown=unknown, secs=(time.clock()-start) )
+            bad, almost, unknown = check(target, wrong, bad, almost, unknown,
+                                         speller, verbose)
+    return dict(bad=bad, n=n, bias=bias, almost=almost, unknown=unknown, 
+                pct=percent(n - bad, n),
+                almostpct=percent(n - bad + almost, n),
+                secs=(time.clock()-start))
+
+def percent(n, total):
+    return int(100. * n / total)
+
+def check(target, wrong, bad, almost, unknown, speller, verbose):
+    mistakes = list(speller.proofread(wrong))
+    failure = None
+    if target == wrong:
+        if mistakes:
+            failure = mistakes[0].suggestions
+            bad += 1
+            unknown += 1
+    elif len(mistakes) != 1:
+        failure = mistakes or 'OK'
+        bad += 1
+    else:
+        suggestions = mistakes[0].suggestions
+        correction = suggestions and suggestions[0]
+        if correction != target:
+            failure = suggestions
+            bad += 1
+            if target in suggestions[:3]: almost += 1
+            if list(speller.proofread(target)):
+                unknown += 1
+    if verbose and failure:
+        print 'correct(%r) => %r; expected %r)' % (wrong, failure, target)
+    return bad, almost, unknown
 
 tests1 = { 'access': 'acess', 'accessing': 'accesing', 'accommodation':
 'accomodation acommodation acomodation', 'account': 'acount', 'address':

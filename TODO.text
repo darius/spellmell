@@ -6,32 +6,35 @@ etherpad might come in handy
 
 API
 
-- accept context of candidate misspelling
+Desired qualities: (X'ed ones are not directly supported by this design)
+
+X accept context of candidate misspelling
 - allow choice of 'dictionary'
-- return multiple results
+- can return multiple results
 - accept whole document as running context (for in-document frequencies, etc.)
-X return scored results
+X return scored results to help you decide which to use
 - support dictionary updates at runtime
 - remember user's corrections
+X allow someone else to do the word chunking
+- be able to take advantage of info from punctuation, etc.
 
-c = spell.Corrector(filename)
-                 Where the file either doesn't exist or hold a saved model
+s = spell.Speller()
 
-c.train(words)   Update the model from an error-free word sequence
+s.train(text)    Update the model from a presumed-error-free English text
+s.save(file)     Store the model in a file
+s.load(file)     Change the model to the one stored in the file
 
-c.save(filename=None)
-                 Store the model to a file (the original file if not specified)
-
-mistakes_iterable = c.correct(text, left_context, right_context)
-  Where text, left_context, and right_context are word sequences
-  Where a mistake is an object m:
-
+mistakes_iterable = s.proofread(text)
+                 Where a mistake is an object m:
 m.position       A position in text
 m.word           The word at that position
 m.suggestions    A list of words in decreasing order of confidence
                  (An empty list means a mistake we can detect but not correct)
-m.correct(word)  Updates the corrector's model
+m.should_have_been(word)       XXX better name?
+                 Update the corrector's model
                  (The word doesn't have to be one of the suggestions)
+                 (Should only be called at most once)
+                 (XXX what if it's called after we're done with text?)
 
 
 EVALUATION
@@ -61,6 +64,7 @@ better error model
       or for doubling/undoubling a consonant or a vowel;
       also, modify costs at beginning or end of word.
   consider edits at greater distance
+  combine distance and frequency info in some fancier way
 
 better language model
   bigger corpus
