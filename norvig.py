@@ -1,3 +1,4 @@
+# Adapted from http://norvig.com/spell-correct.html
 import collections, cPickle, heapq, re
 
 ## s = Speller()
