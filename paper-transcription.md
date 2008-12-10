@@ -90,7 +90,7 @@ So: R's can be commuted among each other.
           c a d |  c a d
 
     Problem: costs are not equal!
-    A deletion in the rotated *unreadable* should be fine, I guess.
+    A deletion in the rotated over should be fine, I guess.
 
     Inserts:
 
