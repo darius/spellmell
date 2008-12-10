@@ -1,9 +1,14 @@
-import collections, cPickle, heapq, re
+"""Spell checker.
 
-## s = Speller()
-## s.train(open('big.txt').read())
-## list(s.proofread('gort'))[0].suggestions
-#. ['got', 'sort', 'port']
+>>> import urllib
+>>> s = Speller()
+>>> s.train(urllib.urlopen('http://norvig.com/big.txt').read())
+>>> list(s.proofread('gort'))[0].suggestions
+['got', 'sort', 'port']
+
+"""
+
+import collections, cPickle, heapq, re
 
 class Speller:
     def __init__(self):

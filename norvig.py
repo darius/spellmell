@@ -1,6 +1,8 @@
 # Adapted from http://norvig.com/spell-correct.html
 import collections, cPickle, heapq, re
 
+# Adaptation of the popular code at http://norvig.com/spell-correct.html
+
 ## s = Speller()
 ## s.train(open('big.txt').read())
 ## list(s.proofread('gort'))[0].suggestions
