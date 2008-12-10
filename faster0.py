@@ -74,5 +74,5 @@ class Mistake:
             self.corrector.train(word)
 
 def words(text):
-    return [(m.start(), m.group(0))
-            for m in re.finditer(r'[a-z]+', text.lower())]
+    return ((m.start(), m.group(0))
+            for m in re.finditer(r'[a-z]+', text.lower()))
