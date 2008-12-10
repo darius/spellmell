@@ -1,8 +1,9 @@
 """Spell checker.
 
->>> import urllib
+>>> import urllib, os
 >>> s = Speller()
->>> s.train(urllib.urlopen('http://norvig.com/big.txt').read())
+>>> s.train((file('big.txt') if os.path.exists('big.txt')
+...          else urllib.urlopen('http://norvig.com/big.txt')).read())
 >>> list(s.proofread('gort'))[0].suggestions
 ['got', 'sort', 'port']
 
