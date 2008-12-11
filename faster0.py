@@ -2,10 +2,13 @@
 
 >>> import urllib, os
 >>> s = Speller()
->>> s.train((file('big.txt') if os.path.exists('big.txt')
-...          else urllib.urlopen('http://norvig.com/big.txt')).read())
+>>> try: s.load(file('bigdict'))
+... except IOError:
+...     s.train((file('big.txt') if os.path.exists('big.txt')
+...              else urllib.urlopen('http://norvig.com/big.txt')).read())
+...     s.save('bigdict')
 >>> list(s.proofread('gort'))[0].suggestions
-['got', 'sort', 'port']
+['got', 'sort', 'fort']
 
 """
 
