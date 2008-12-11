@@ -1,6 +1,7 @@
 #import norvig as spelling
-#import faster0 as spelling
-import faster1 as spelling
+import faster0 as spelling
+#import faster1 as spelling
+#import bigrammer as spelling
 import time
 
 def main(argv):
@@ -19,7 +20,9 @@ def timed(label, f):
     result = f()
     print 'Time for %s: %g' % (label, time.clock() - start)
     return result
-    
+
+# Adapted from http://norvig.com/spell-correct.html
+   
 def spelltest(speller, tests, bias=0, verbose=False):
     for i in range(bias):
         for target in tests:
