@@ -3,6 +3,13 @@
 #import faster1 as spelling
 import bigrammer as spelling
 import time
+import ansi
+
+def red(s):   return color(ansi.red, s)
+def blue(s):  return color(ansi.blue, s)
+def green(s): return color(ansi.green, s)
+def color(c, s):
+    return ansi.set_foreground(c) + s + ansi.set_foreground(ansi.black)
 
 def main(argv):
     def train_it():
@@ -29,13 +36,13 @@ def spelltest(speller, f):
         goodline = f.readline()
         blank = f.readline()
         assert blank.isspace()
-        corrected = correct(badline, speller)
+        corrected, before, after = correct(badline, speller)
         n += 1
-        nwrong += (goodline != corrected)
-        if goodline != corrected:
-            print 'From:     ' + badline
-            print 'Expected: ' + goodline
-            print 'Got:      ' + corrected
+        if goodline.lower() != corrected.lower(): # TODO: expect correct case as well
+            nwrong += 1
+            print 'From:     ' + before.rstrip()
+            print 'Expected: ' + goodline.rstrip()
+            print 'Got:      ' + after.rstrip()
             print ''
     return dict(n=n, nwrong=nwrong, 
                 pct=percent(n - nwrong, n),
@@ -45,14 +52,19 @@ def percent(n, total):
     return int(100. * n / total)
 
 def correct(text, speller):
-    fixed = ''
+    fixed = before = after = ''
     p = 0
     for mistake in speller.proofread(text):
-        word = mistake.suggestions[0] if mistake.suggestions else mistake.word
-        fixed += text[p:mistake.position] + word
+        word = (mistake.suggestions[0] if mistake.suggestions
+                else '#' * len(mistake.word))
+        fixed  += text[p:mistake.position] + word
+        before += text[p:mistake.position] + red(mistake.word)
+        after  += text[p:mistake.position] + blue(word)
         p = mistake.position + len(mistake.word)
-    fixed += text[p:]
-    return fixed
+    fixed  += text[p:]
+    before += text[p:]
+    after  += text[p:]
+    return fixed, before, after
 
 if __name__ == '__main__':
     import sys

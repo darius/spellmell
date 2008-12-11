@@ -44,11 +44,12 @@ class Speller:
             self._note_prefixes(word)
     def proofread(self, text):
         # XXX use _succs
-        for pos, word in words(text):
+        for pos, orig_word in words(text):
+            word = orig_word.lower()
             if word in self._counts: continue
             edits = self._edits('', word, 1) or self._edits('', word, 2)
             suggestions = heapq.nlargest(3, edits, key=self._counts.get)
-            yield Mistake(self, pos, word, suggestions)
+            yield Mistake(self, pos, orig_word, suggestions)
     def _edits(self, head, tail, distance):
         # Return a set of the words in self._counts that are at the
         # given edit distance from head+tail (with edits restricted to
@@ -90,4 +91,4 @@ class Mistake:
 
 def words(text):
     return ((m.start(), m.group(0))
-            for m in re.finditer(r'[a-z]+', text.lower()))
+            for m in re.finditer(r'[A-Za-z]+', text))
