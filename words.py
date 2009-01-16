@@ -2,7 +2,7 @@ import re
 import sys
 
 def words(text):
-    return map(stripquote, re.findall("""[a-z']+""", text.lower()) )
+    return map(stripquote, re.findall("""[a-z']+""", text.lower()))
 
 def stripquote(s):
     #return s.replace("'", "")
