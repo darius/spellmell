@@ -1,5 +1,5 @@
 """Spell checker.
-
+>>> from faster0 import *
 >>> import urllib, os
 >>> s = Speller()
 >>> try: s.load(file('bigdict'))
@@ -8,11 +8,11 @@
 ...              else urllib.urlopen('http://norvig.com/big.txt')).read())
 ...     s.save('bigdict')
 >>> list(s.proofread('gort'))[0].suggestions
-['got', 'sort', 'fort']
+['got', 'sort', 'port']
 
 """
 
-import collections, cPickle, heapq, re
+import collections, cPickle, heapq, operator, re
 
 class Speller:
     def __init__(self):
@@ -61,10 +61,7 @@ class Speller:
 alphabet = 'abcdefghijklmnopqrstuvwxyz'
 
 def flatten(xss):
-    result = []
-    for xs in xss:
-        result.extend(xs)
-    return set(result)
+    return reduce(operator.or_, map(set, xss), set())
 
 class Mistake:
     def __init__(self, corrector, position, word, suggestions):
