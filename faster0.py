@@ -1,12 +1,12 @@
 """Spell checker.
->>> from faster0 import *
+>>> from faster0 import Speller
 >>> import urllib, os
 >>> s = Speller()
 >>> try: s.load(file('bigdict'))
 ... except IOError:
 ...     s.train((file('big.txt') if os.path.exists('big.txt')
 ...              else urllib.urlopen('http://norvig.com/big.txt')).read())
-...     s.save('bigdict')
+...     s.save(open('bigdict', 'w'))
 >>> list(s.proofread('gort'))[0].suggestions
 ['got', 'sort', 'port']
 
