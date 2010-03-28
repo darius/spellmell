@@ -1,12 +1,11 @@
 """Spell checker.
+
 >>> from faster0 import Speller
 >>> import urllib, os
 >>> s = Speller()
->>> try: s.load(file('bigdict'))
-... except IOError:
-...     s.train((file('big.txt') if os.path.exists('big.txt')
-...              else urllib.urlopen('http://norvig.com/big.txt')).read())
-...     s.save(open('bigdict', 'w'))
+>>> s.cached_load('bigdict',
+...   lambda: (open('big.txt') if os.path.exists('big.txt')
+...            else urllib.urlopen('http://norvig.com/big.txt')).read())
 >>> list(s.proofread('gort'))[0].suggestions
 ['got', 'sort', 'port']
 
@@ -19,6 +18,12 @@ class Speller:
         # _freqs gives the frequencies of all words we've trained on.
         # _prefixes holds all prefixes of all words we've trained on.
         self._freqs, self._prefixes = collections.defaultdict(int), set()
+    def cached_load(self, filename, get_corpus):
+        try:
+            self.load(open(filename))
+        except IOError:
+            self.train(get_corpus())
+            self.save(open(filename, 'w'))
     def train(self, text):
         for pos, word in words(text):
             if word not in self._prefixes: self._note_prefixes(word)
