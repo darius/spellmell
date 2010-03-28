@@ -28,6 +28,8 @@ mistakes_iterable = s.proofread(text)
                  Where a mistake is an object m:
 m.position       A position in text
 m.word           The word at that position
+m.probability    Estimated probability that the original word is a
+                 mistake [XXX unimplemented]
 m.suggestions    A list of words in decreasing order of confidence
                  (An empty list means a mistake we can detect but not correct)
 m.should_have_been(word)       XXX better name?
