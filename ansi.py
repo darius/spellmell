@@ -4,7 +4,7 @@ ANSI terminal control
 
 ansi = '\x1b['
 
-black, red, green, yellow, blue, magenta, cyan, white = range(8)
+black, red, green, yellow, blue, magenta, cyan, white, default_color = range(9)
 
 def bright(color):
     return 60 + color

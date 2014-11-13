@@ -9,7 +9,7 @@ def red(s):   return color(ansi.red, s)
 def blue(s):  return color(ansi.blue, s)
 def green(s): return color(ansi.green, s)
 def color(c, s):
-    return ansi.set_foreground(c) + s + ansi.set_foreground(ansi.black)
+    return ansi.set_foreground(c) + s + ansi.set_foreground(ansi.default_color)
 
 def main(argv):
     def train_it():
