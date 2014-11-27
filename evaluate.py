@@ -1,5 +1,6 @@
 #import norvig as spelling
 import faster0 as spelling
+#import binsearch as spelling
 #import faster1 as spelling
 #import bigrammer as spelling
 import time
@@ -12,7 +13,7 @@ def main(argv):
     timed('training', train_it)
     speller = spelling.Speller()
     timed('loading', lambda: speller.load(open('bigdict')))
-    print spelltest(speller, tests1)
+    print spelltest(speller, tests1, verbose=False)
 #    print spelltest(speller, tests2)
 
 def timed(label, f):

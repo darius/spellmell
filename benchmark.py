@@ -4,6 +4,7 @@ import time
 
 #import norvig as spelling
 import faster0 as spelling
+#import binsearch as spelling
 
 def main(argv):
     speller = spelling.Speller()
